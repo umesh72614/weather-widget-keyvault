@@ -32,7 +32,7 @@ const getKeyVaultSecret = async (keyValutSecretName) => {
 }
 
 // openweatherapi key
-const secretName = "API_KEY";
+const secretName = "API-KEY";
 const API_KEY = await getKeyVaultSecret(secretName);
 
 // home route - handle get request
