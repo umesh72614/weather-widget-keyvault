@@ -33,7 +33,7 @@ const getKeyVaultSecret = async (keyValutSecretName) => {
 
 // openweatherapi key
 const secretName = "API-KEY";
-const API_KEY = await getKeyVaultSecret(secretName);
+const API_KEY = getKeyVaultSecret(secretName);
 
 // home route - handle get request
 app.get("/" , function (req,res) {
