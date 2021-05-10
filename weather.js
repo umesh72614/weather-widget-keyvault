@@ -7,8 +7,8 @@ const express = require("express");
 const bp = require("body-parser");
 const https = require("https");
 // Importing azure (keyvault) dependencies
-const DefaultAzureCredential = require("@azure/identity");
-const SecretClient = require("@azure/keyvault-secrets");
+const { DefaultAzureCredential } = require("@azure/identity");
+const { SecretClient } = require("@azure/keyvault-secrets");
 // Cloud hosts like Heroku or Azure, however, use the PORT variable to tell you on which port your server should listen for the routing to work properly
 // Helpful read: https://docs.microsoft.com/en-us/azure/app-service/configure-language-nodejs
 const PORT = process.env.PORT || 3000
@@ -18,7 +18,8 @@ app.use(bp.urlencoded({extended:true}));
 
 // Create Vault URL from App Settings
 const vaultUrl = "https://" + process.env.VaultName + ".vault.azure.net/";
-const secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
+const credential = new DefaultAzureCredential();
+const secretClient = new SecretClient(vaultUrl, credential);
 
 // Utility function to get secret from given name
 (async () =>  {
