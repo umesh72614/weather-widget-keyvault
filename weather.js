@@ -18,22 +18,19 @@ app.use(bp.urlencoded({extended:true}));
 
 // Create Vault URL from App Settings
 const vaultUrl = "https://" + process.env.VaultName + ".vault.azure.net/";
+const secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
 
 // Utility function to get secret from given name
-const getKeyVaultSecret = async (keyValutSecretName) => {
-    // Create a key vault secret client
-    let secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
-    try {
-        const secret = await secretClient.getSecret(keyValutSecretName);
-        return secret.value;
-    } catch(err) {
-      console.log(err.message);
-    }
-}
-
-// openweatherapi key
-const secretName = "API-KEY";
-const API_KEY = getKeyVaultSecret(secretName);
+(async () =>  {
+  // openweatherapi key
+  const secretName = "API-KEY";
+  const secret = await secretClient.getSecret(secretName);
+  const API_KEY = secret.value;
+  // listen to PORT
+  app.listen(PORT, function () {
+      console.log("Server has started on localhost:" + PORT);
+  });
+})().catch(err => console.log(err));
 
 // home route - handle get request
 app.get("/" , function (req,res) {
@@ -68,9 +65,4 @@ app.post("/" , function (req,res) {
             }
         });
     });    
-});
-
-// listen to PORT
-app.listen(PORT, function () {
-    console.log("Server has started on localhost:" + PORT);
 });
