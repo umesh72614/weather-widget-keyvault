@@ -22,7 +22,7 @@ const vaultUrl = "https://" + process.env.VaultName + ".vault.azure.net/";
 // Utility function to get secret from given name
 const getKeyVaultSecret = async (keyValutSecretName) => {
     // Create a key vault secret client
-    let secretClient = new SecretClient(vaultUri, new DefaultAzureCredential());
+    let secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
     try {
         const secret = await client.getSecret(keyValutSecretName);
         return secret.value;
@@ -47,7 +47,9 @@ app.post("/" , function (req,res) {
     https.get(url , function (response) {
         response.on("data" , function (data) {
             var weatherData = JSON.parse(data);
-            // console.log(weatherData);
+            console.log(weatherData);
+            res.write("<p>WeatherData: " + weatherData + "</p><br>");
+            res.write("<p>API_KEY: " + API_KEY + "</p><br>"); 
             if (weatherData.cod != 200) {
                 res.write('<h1> Sorry your Location is not Found! Try Again with another Location! </h1>');
                 res.write("<form action=\"/\" method=\"get\">\n<input type=\"submit\" value=\"Go to Home\"\n />\n</form>");
