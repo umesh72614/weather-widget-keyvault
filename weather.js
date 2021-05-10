@@ -24,10 +24,10 @@ const getKeyVaultSecret = async (keyValutSecretName) => {
     // Create a key vault secret client
     let secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
     try {
-        const secret = await client.getSecret(keyValutSecretName);
+        const secret = await secretClient.getSecret(keyValutSecretName);
         return secret.value;
     } catch(err) {
-      console.log(err.message)
+      console.log(err.message);
     }
 }
 
