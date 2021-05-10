@@ -24,7 +24,7 @@ const secretClient = new SecretClient(vaultUrl, credential);
 // Utility function to get secret from given name
 (async () =>  {
   // openweatherapi key
-  const secretName = "API-KEY";
+  const secretName = 'API-KEY';
   const secret = await secretClient.getSecret(secretName);
   const API_KEY = secret.value;
   // listen to PORT
@@ -42,16 +42,21 @@ app.get("/" , function (req,res) {
 app.post("/" , function (req,res) {
     var city = req.body.city;
     var url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + API_KEY + "&units=metric";
+    console.log(weatherData);
+    console.log(API_KEY);
+    res.write("<p>WeatherData: " + weatherData + "</p><br>");
+    res.write("<p>API_KEY: " + API_KEY + "</p><br>");
     https.get(url , function (response) {
         response.on("data" , function (data) {
             var weatherData = JSON.parse(data);
             console.log(weatherData);
+            console.log(API_KEY);
             res.write("<p>WeatherData: " + weatherData + "</p><br>");
             res.write("<p>API_KEY: " + API_KEY + "</p><br>"); 
             if (weatherData.cod != 200) {
                 res.write('<h1> Sorry your Location is not Found! Try Again with another Location! </h1>');
                 res.write("<form action=\"/\" method=\"get\">\n<input type=\"submit\" value=\"Go to Home\"\n />\n</form>");
-                res.send();
+//                 res.send();
             }
             else {
                 var temp = weatherData.main.temp;
@@ -62,8 +67,9 @@ app.post("/" , function (req,res) {
                 res.write("<h2> Description of the Current Weather : " + desc + ". </h2>");
                 res.write("<img src = " + imgUrl + ">");
                 res.write("<form action=\"/\" method=\"get\">\n<input type=\"submit\" value=\"Go to Home\"\n />\n</form>");
-                res.send();
+//                 res.send();
             }
         });
-    });    
+    });
+    res.send();
 });
