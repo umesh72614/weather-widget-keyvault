@@ -19,7 +19,7 @@ app.use(bp.urlencoded({extended:true}));
 // Create Vault URL from App Settings
 const vaultUrl = "https://" + process.env.VaultName + ".vault.azure.net/";
 const credential = new DefaultAzureCredential();
-const secretClient = new SecretClient(vaultUrl, credential);
+const secClient = new SecretClient(vaultUrl, credential);
 
 // Map of key vault secret names to values
 let vaultSecretsMap = {};
@@ -27,10 +27,10 @@ let vaultSecretsMap = {};
 // Utility function to get secret from given name
 const getKeyVaultSecrets = async () => {
   // Create a key vault secret client
-  let secretClient = new SecretClient(vaultUri, new DefaultAzureCredential());
+  let secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
   try {
     // Iterate through each secret in the vault
-    listPropertiesOfSecrets = client.listPropertiesOfSecrets();
+    listPropertiesOfSecrets = secretClient.listPropertiesOfSecrets();
     while (true) {
       let { done, value } = await listPropertiesOfSecrets.next();
       if (done) {
@@ -38,7 +38,7 @@ const getKeyVaultSecrets = async () => {
       }
       // Only load enabled secrets - getSecret will return an error for disabled secrets
       if (value.enabled) {
-        const secret = await client.getSecret(value.name);
+        const secret = await secretClient.getSecret(value.name);
         vaultSecretsMap[value.name] = secret.value;
       }
     }
@@ -97,7 +97,7 @@ app.post("/" , function (req,res) {
   // openweatherapi key
   await getKeyVaultSecrets();
   const secretName = 'API-KEY';
-  const secret = await secretClient.getSecret(secretName);
+  const secret = await secClient.getSecret(secretName);
   const API_KEY = secret.value;
   // listen to PORT
   app.listen(PORT, function () {
