@@ -21,20 +21,38 @@ const vaultUrl = "https://" + process.env.VaultName + ".vault.azure.net/";
 const credential = new DefaultAzureCredential();
 const secretClient = new SecretClient(vaultUrl, credential);
 
+// Map of key vault secret names to values
+let vaultSecretsMap = {};
+
 // Utility function to get secret from given name
-(async () =>  {
-  // openweatherapi key
-  const secretName = 'API-KEY';
-  const secret = await secretClient.getSecret(secretName);
-  const API_KEY = secret.value;
-  // listen to PORT
-  app.listen(PORT, function () {
-      console.log("Server has started on localhost:" + PORT);
-  });
-})().catch(err => console.log(err));
+const getKeyVaultSecrets = async () => {
+  // Create a key vault secret client
+  let secretClient = new SecretClient(vaultUri, new DefaultAzureCredential());
+  try {
+    // Iterate through each secret in the vault
+    listPropertiesOfSecrets = client.listPropertiesOfSecrets();
+    while (true) {
+      let { done, value } = await listPropertiesOfSecrets.next();
+      if (done) {
+        break;
+      }
+      // Only load enabled secrets - getSecret will return an error for disabled secrets
+      if (value.enabled) {
+        const secret = await client.getSecret(value.name);
+        vaultSecretsMap[value.name] = secret.value;
+      }
+    }
+  } catch(err) {
+    console.log(err.message)
+  }
+}
 
 // home route - handle get request
 app.get("/" , function (req,res) {
+    console.log(API_KEY);
+    console.log(JSON.stringify(vaultSecretsMap));
+    res.write("API_KEY: " + API_KEY);
+    res.write(JSON.stringify(vaultSecretsMap));
     res.sendFile(__dirname + "/index.html");
 });
 
@@ -44,15 +62,15 @@ app.post("/" , function (req,res) {
     var url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + API_KEY + "&units=metric";
     console.log(weatherData);
     console.log(API_KEY);
-    res.write("<p>WeatherData: " + weatherData + "</p><br>");
-    res.write("<p>API_KEY: " + API_KEY + "</p><br>");
+    res.write("WeatherData: " + weatherData);
+    res.write("API_KEY: " + API_KEY);
     https.get(url , function (response) {
         response.on("data" , function (data) {
             var weatherData = JSON.parse(data);
             console.log(weatherData);
             console.log(API_KEY);
-            res.write("<p>WeatherData: " + weatherData + "</p><br>");
-            res.write("<p>API_KEY: " + API_KEY + "</p><br>"); 
+            res.write("WeatherData: " + weatherData);
+            res.write("API_KEY: " + API_KEY); 
             if (weatherData.cod != 200) {
                 res.write('<h1> Sorry your Location is not Found! Try Again with another Location! </h1>');
                 res.write("<form action=\"/\" method=\"get\">\n<input type=\"submit\" value=\"Go to Home\"\n />\n</form>");
@@ -73,3 +91,16 @@ app.post("/" , function (req,res) {
     });
     res.send();
 });
+
+// Utility function to get secret from given name
+(async () =>  {
+  // openweatherapi key
+  await getKeyVaultSecrets();
+  const secretName = 'API-KEY';
+  const secret = await secretClient.getSecret(secretName);
+  const API_KEY = secret.value;
+  // listen to PORT
+  app.listen(PORT, function () {
+      console.log("Server has started on localhost:" + PORT);
+  });
+})().catch(err => console.log(err));
